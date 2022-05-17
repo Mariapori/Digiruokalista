@@ -12,6 +12,15 @@ namespace Digiruokalista_Remastered.Common
         public bool useSSL { get; set; } = default!;
         public string email { get; set; } = null!;
 
+        public CustomEmailer(string host, string password, int port, bool useSSL, string email)
+        {
+            this.host = host;
+            this.password = password;
+            this.port = port;
+            this.useSSL = useSSL;
+            this.email = email;
+        }
+
         public Task SendEmailAsync(string toEmail, string subject, string htmlMessage)
         {
             using(var smtpClient = new SmtpClient())
