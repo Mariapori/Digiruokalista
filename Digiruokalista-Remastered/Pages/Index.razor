@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<Data.ApplicationDbContext> context
-@inject NavigationManager NavManager
+
 <PageTitle>Etusivu</PageTitle>
 
 <h1>Digiruokalista</h1>
@@ -33,4 +33,5 @@
         Ravintolat = db.Ravintola.ToList();
         base.OnInitialized();
     }
+
 }
