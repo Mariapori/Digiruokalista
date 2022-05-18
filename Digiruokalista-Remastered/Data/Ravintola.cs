@@ -10,6 +10,8 @@ namespace Digiruokalista_Remastered.Data
         public string? Nimi { get; set; }
         [Required]
         public string? yTunnus { get; set; }
+        [Required]
+        public string? Paikkakunta { get; set; }
         public string? Puhelinnumero { get;set; }
         public List<Kategoria> Kategoriat { get; set; } = new List<Kategoria>();
     }
