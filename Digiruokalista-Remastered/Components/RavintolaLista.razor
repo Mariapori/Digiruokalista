@@ -1,0 +1,43 @@
+﻿@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.ApplicationDbContext> context
+
+
+@if(ShowTitle == true)
+{
+    <h2>Ravintolat</h2>
+}
+<table class="table table-striped">
+    <thead class="table table-dark">
+        <tr>
+            <th>Nimi</th>
+            <th>Y-Tunnus</th>
+            <th>Toiminnot</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var Ravintola in Ravintolat)
+        {
+            <tr>
+                <td>@Ravintola.Nimi</td>
+                <td>@Ravintola.yTunnus</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    [Parameter]
+    public bool ShowTitle { get; set; }
+
+    private List<Data.Ravintola> Ravintolat = null!;
+
+
+    protected override void OnInitialized()
+    {
+        var db = context.CreateDbContext();
+        Ravintolat = db.Ravintola.ToList();
+        base.OnInitialized();
+    }
+
+}

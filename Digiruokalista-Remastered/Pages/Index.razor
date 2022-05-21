@@ -1,37 +1,9 @@
-﻿@page "/"
-@using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<Data.ApplicationDbContext> context
+﻿@using Digiruokalista_Remastered.Components
+@page "/"
+
 
 <PageTitle>Etusivu</PageTitle>
 
 <h1>Digiruokalista</h1>
 
-<table class="table table-striped">
-    <thead class="table table-dark">
-        <tr>
-            <th>Nimi</th>
-            <th>Y-Tunnus</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var Ravintola in Ravintolat)
-        {
-            <tr>
-                <td>@Ravintola.Nimi</td>
-                <td>@Ravintola.yTunnus</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@code
-{
-    private List<Data.Ravintola> Ravintolat;
-    protected override void OnInitialized()
-    {
-        var db = context.CreateDbContext();
-        Ravintolat = db.Ravintola.ToList();
-        base.OnInitialized();
-    }
-
-}
+<RavintolaLista ShowTitle=true></RavintolaLista>
