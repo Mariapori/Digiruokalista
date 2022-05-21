@@ -12,6 +12,11 @@ a, .btn-link {
     color: #0071c1;
 }
 
+.hover:hover{
+    font-size: larger;
+    text-decoration:underline;
+}
+
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;

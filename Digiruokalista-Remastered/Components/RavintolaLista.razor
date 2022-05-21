@@ -1,12 +1,21 @@
-﻿@using Microsoft.EntityFrameworkCore
+﻿@using Digiruokalista_Remastered.Data
+@using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<Data.ApplicationDbContext> context
 
 
-@if(ShowTitle == true)
+@if(ShowTitle == true && ValittuRavintola == null)
 {
     <h2>Ravintolat</h2>
 }
-<table class="table table-striped">
+
+@if(ValittuRavintola != null)
+{
+    <button class="btn btn-outline-danger" @onclick="() => ValittuRavintola = null">Sulje</button>
+    <RavintolaKomp ravintola=ValittuRavintola></RavintolaKomp>
+}
+else
+{
+    <table class="table table-striped">
     <thead class="table table-dark">
         <tr>
             <th>Nimi</th>
@@ -17,7 +26,7 @@
     <tbody>
         @foreach (var Ravintola in Ravintolat)
         {
-            <tr>
+            <tr class="hover" @onclick="() => ValittuRavintola = Ravintola">
                 <td>@Ravintola.Nimi</td>
                 <td>@Ravintola.yTunnus</td>
                 <td></td>
@@ -25,19 +34,21 @@
         }
     </tbody>
 </table>
+}
 
 @code
 {
     [Parameter]
     public bool ShowTitle { get; set; }
 
-    private List<Data.Ravintola> Ravintolat = null!;
+    private List<Ravintola> Ravintolat = null!;
+    private Ravintola? ValittuRavintola = null!;
 
 
     protected override void OnInitialized()
     {
         var db = context.CreateDbContext();
-        Ravintolat = db.Ravintola.ToList();
+        Ravintolat = db.Ravintola.Include(o => o.Kategoriat).ThenInclude(o => o.Ruuat).ThenInclude(o => o.Hinnat).ToList();
         base.OnInitialized();
     }
 

@@ -1,0 +1,54 @@
+@using Digiruokalista_Remastered.Data
+
+<h3>@ravintola.Nimi</h3>
+
+@if(ravintola.Kategoriat != null && ravintola?.Kategoriat.Count > 0)
+{
+    @foreach (var kategoria in ravintola.Kategoriat)
+    {
+        <div class="card ">
+            <div class="card-header bg-dark text-white">
+                <b>@kategoria.Nimi</b>
+            </div>
+            <div class="card-body">
+                @if(kategoria.Ruuat != null && kategoria.Ruuat.Count > 0)
+                {
+                    @foreach(var ruoka in kategoria.Ruuat)
+                    {
+                        <hr />
+                        if(ruoka.AnnosNro > 0)
+                        {
+                            <b>@ruoka.AnnosNro. @ruoka.Nimi</b>
+                            @if(ruoka.Hinnat != null && ruoka.Hinnat.Count > 0)
+                            {
+                                @foreach (var hinta in ruoka.Hinnat)
+                                {
+                                    <p>@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                }
+                            }
+                        }else{
+                            <b>@ruoka.Nimi</b>
+                            @if(ruoka.Hinnat != null && ruoka.Hinnat.Count > 0)
+                            {
+                                @foreach (var hinta in ruoka.Hinnat)
+                                {
+                                    <p>@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                }
+                            }
+                        }
+                        <hr />
+                    }
+                }
+            </div>
+            <div class="card-footer bg-dark">
+                
+            </div>
+        </div>    
+    }
+}
+
+
+@code{
+    [Parameter]
+    public Ravintola ravintola { get; set; } = null!;
+}
