@@ -16,24 +16,43 @@
                     @foreach(var ruoka in kategoria.Ruuat)
                     {
                         <hr />
-                        if(ruoka.AnnosNro > 0)
+                        if(ruoka.AnnosNro != 0)
                         {
                             <b>@ruoka.AnnosNro. @ruoka.Nimi</b>
                             @if(ruoka.Hinnat != null && ruoka.Hinnat.Count > 0)
                             {
-                                @foreach (var hinta in ruoka.Hinnat)
+                                decimal avg = ruoka.Hinnat.Average(o => o.Summa);
+                                @foreach (var hinta in ruoka.Hinnat.OrderBy(o => o.Summa))
                                 {
-                                    <p>@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                    if(hinta.Summa < avg)
+                                    {
+                                        <p class="p-0 m-0" style="color: green;">@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                    }else if(hinta.Summa == avg)
+                                    {
+                                        <p class="p-0 m-0" style="color: yellow;">@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                    }else if(hinta.Summa > avg)
+                                    {
+                                        <p class="p-0 m-0" style="color: red;">@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                    }
                                 }
                             }
                         }else{
                             <b>@ruoka.Nimi</b>
                             @if(ruoka.Hinnat != null && ruoka.Hinnat.Count > 0)
                             {
-                                @foreach (var hinta in ruoka.Hinnat)
+                                decimal avg = ruoka.Hinnat.Average(o => o.Summa);
+                                @foreach (var hinta in ruoka.Hinnat.OrderBy(o => o.Summa))
                                 {
-                                    <p>@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
-                                }
+                                    if(hinta.Summa < avg)
+                                    {
+                                        <p class="p-0 m-0" style="color: green;">@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                    }else if(hinta.Summa == avg)
+                                    {
+                                        <p class="p-0 m-0" style="color: yellow;">@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                    }else if(hinta.Summa > avg)
+                                    {
+                                        <p class="p-0 m-0" style="color: red;">@hinta.Kuvaus: @Math.Round(hinta.Summa,2).ToString()€</p>
+                                    }                                }
                             }
                         }
                         <hr />
