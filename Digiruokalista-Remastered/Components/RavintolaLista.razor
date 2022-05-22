@@ -1,5 +1,7 @@
 ﻿@using Digiruokalista_Remastered.Data
 @using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject IHttpContextAccessor HttpContextAccessor
 @inject IDbContextFactory<Data.ApplicationDbContext> context
 
 
@@ -7,13 +9,16 @@
 {
     <h2>Ravintolat</h2>
 }
-
+@if (HttpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated ?? false)
+{
+    <button class="btn btn-dark mb-1" @onclick="() => UusiRavintola = new Ravintola()">Uusi ravintola</button>
+}
 @if(ValittuRavintola != null)
 {
     <button class="btn btn-outline-danger" @onclick="() => ValittuRavintola = null">Sulje</button>
     <RavintolaKomp ravintola=ValittuRavintola></RavintolaKomp>
 }
-else
+@if(ValittuRavintola == null && UusiRavintola == null)
 {
     <table class="table table-striped">
     <thead class="table table-dark">
@@ -36,6 +41,32 @@ else
 </table>
 }
 
+@if(UusiRavintola != null)
+{
+    <table class="table">
+        <tr>
+            <th><label>Ravintolan nimi:</label></th>
+            <td><input type="text" @bind=UusiRavintola.Nimi/></td>
+        </tr>
+        <tr>
+            <th><label>Y-Tunnus:</label></th>
+            <td><input type="text" @bind=UusiRavintola.yTunnus/></td>
+        </tr>
+         <tr>
+            <th><label>Kaupunki:</label></th>
+            <td><input type="text" @bind=UusiRavintola.Paikkakunta/></td>
+        </tr>
+         <tr>
+            <th><label>Puhelinnumero:</label></th>
+            <td><input type="text" @bind=UusiRavintola.Puhelinnumero/></td>
+        </tr>
+        <tr>
+            <th></th>
+            <td><button @onclick="UusiRavintolaAction" class="btn btn-dark">Luo</button></td>
+        </tr>
+    </table>
+}
+
 @code
 {
     [Parameter]
@@ -43,6 +74,7 @@ else
 
     private List<Ravintola> Ravintolat = null!;
     private Ravintola? ValittuRavintola = null!;
+    private Ravintola? UusiRavintola = null!;
 
 
     protected override void OnInitialized()
@@ -50,6 +82,18 @@ else
         var db = context.CreateDbContext();
         Ravintolat = db.Ravintola.Include(o => o.Kategoriat).ThenInclude(o => o.Ruuat).ThenInclude(o => o.Hinnat).ToList();
         base.OnInitialized();
+    }
+    void UusiRavintolaAction()
+    {
+        var principal = HttpContextAccessor.HttpContext.User;
+        var loggedInUserId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var db = context.CreateDbContext();
+        UusiRavintola.KayttajaID = loggedInUserId;
+        db.Ravintola.Add(UusiRavintola);
+        db.SaveChanges();
+        UusiRavintola = null;
+        Ravintolat = db.Ravintola.Include(o => o.Kategoriat).ThenInclude(o => o.Ruuat).ThenInclude(o => o.Hinnat).ToList();
+        StateHasChanged();
     }
 
 }
