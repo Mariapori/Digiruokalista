@@ -9,7 +9,7 @@
 {
     <h2>Ravintolat</h2>
 }
-@if (HttpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated ?? false && UusiRavintola == null && ValittuRavintola == null)
+@if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated && UusiRavintola == null && ValittuRavintola == null)
 {
     <button class="btn btn-dark mb-1" @onclick="() => UusiRavintola = new Ravintola()">Uusi ravintola</button>
 }
@@ -21,20 +21,36 @@
 @if(ValittuRavintola == null && UusiRavintola == null)
 {
     <table class="table table-striped">
-    <thead class="table table-dark">
-        <tr>
-            <th>Nimi</th>
-            <th>Y-Tunnus</th>
-            <th>Toiminnot</th>
+        <thead class="table table-dark">
+            <tr>
+                <th>Nimi</th>
+                <th>Y-Tunnus</th>
+                @if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+                {
+                   <th>Toiminnot</th> 
+                }
+                
         </tr>
     </thead>
     <tbody>
         @foreach (var Ravintola in Ravintolat)
         {
-            <tr class="hover" @onclick="() => ValittuRavintola = Ravintola">
-                <td>@Ravintola.Nimi</td>
+            <tr>
+                <td class="hover" @onclick="() => ValittuRavintola = Ravintola">@Ravintola.Nimi</td>
                 <td>@Ravintola.yTunnus</td>
-                <td></td>
+                    @if(HttpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) == Ravintola.KayttajaID)
+                    {
+                        <td>
+                            <button class="btn btn-info" @onclick="() => UusiRavintola = Ravintola">Muokkaa</button>
+                            <button class="btn btn-danger" @onclick="() => PoistaRavintola(Ravintola)">Poista</button>
+                        </td>
+                    }
+                    else
+                    {
+<td></td>
+                    }
+                   
+                   
             </tr>
         }
     </tbody>
@@ -76,7 +92,6 @@
     private Ravintola? ValittuRavintola = null!;
     private Ravintola? UusiRavintola = null!;
 
-
     protected override void OnInitialized()
     {
         var db = context.CreateDbContext();
@@ -87,7 +102,23 @@
     {
         var principal = HttpContextAccessor.HttpContext.User;
         var loggedInUserId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if(string.IsNullOrEmpty(loggedInUserId)){
+            throw new Exception("Et ole kirjautunut sisään!");
+        }
+
         var db = context.CreateDbContext();
+
+        if(UusiRavintola.RavintolaID > 0)
+        {
+            db.Ravintola.Update(UusiRavintola);
+            db.SaveChanges();
+            UusiRavintola = null;
+            Ravintolat = db.Ravintola.Include(o => o.Kategoriat).ThenInclude(o => o.Ruuat).ThenInclude(o => o.Hinnat).ToList();
+            StateHasChanged();
+            return;
+        }
+
         UusiRavintola.KayttajaID = loggedInUserId;
         db.Ravintola.Add(UusiRavintola);
         db.SaveChanges();
@@ -95,5 +126,21 @@
         Ravintolat = db.Ravintola.Include(o => o.Kategoriat).ThenInclude(o => o.Ruuat).ThenInclude(o => o.Hinnat).ToList();
         StateHasChanged();
     }
-
+    public void PoistaRavintola(Ravintola ravintola)
+    {
+        var principal = HttpContextAccessor.HttpContext.User;
+        var loggedInUserId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(ravintola.KayttajaID == loggedInUserId)
+        {
+            var db = context.CreateDbContext();
+            db.Ravintola.Remove(ravintola);
+            db.SaveChanges();
+            Ravintolat = db.Ravintola.Include(o => o.Kategoriat).ThenInclude(o => o.Ruuat).ThenInclude(o => o.Hinnat).ToList();
+        }
+        else
+        {
+            throw new Exception("Sinulla ei ole oikeutta tähän!");
+        }
+        StateHasChanged();
+    }
 }
