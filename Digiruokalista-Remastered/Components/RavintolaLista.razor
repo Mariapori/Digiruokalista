@@ -9,7 +9,7 @@
 {
     <h2>Ravintolat</h2>
 }
-@if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated && UusiRavintola == null && ValittuRavintola == null)
+@if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false == true && UusiRavintola == null && ValittuRavintola == null)
 {
     <button class="btn btn-dark mb-1" @onclick="() => UusiRavintola = new Ravintola()">Uusi ravintola</button>
 }
@@ -25,7 +25,7 @@
             <tr>
                 <th>Nimi</th>
                 <th>Y-Tunnus</th>
-                @if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+                @if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false == true)
                 {
                    <th>Toiminnot</th> 
                 }else{
@@ -35,16 +35,18 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var Ravintola in Ravintolat)
+            @if(Ravintolat != null & Ravintolat.Count > 0)
+            {
+                            @foreach (var Ravintola in Ravintolat)
         {
             <tr>
-                <td class="hover" @onclick="() => ValittuRavintola = Ravintola">@Ravintola.Nimi</td>
-                <td>@Ravintola.yTunnus</td>
-                    @if(HttpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) == Ravintola.KayttajaID)
+                <td class="hover" @onclick="() => ValittuRavintola = Ravintola">@Ravintola?.Nimi</td>
+                <td>@Ravintola?.yTunnus</td>
+                    @if(HttpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) == Ravintola?.KayttajaID)
                     {
                         <td>
-                            <button class="btn btn-info" @onclick="() => UusiRavintola = Ravintola">Muokkaa</button>
-                            <button class="btn btn-danger" @onclick="() => PoistaRavintola(Ravintola)">Poista</button>
+                            <button class="btn btn-info" @onclick="() => UusiRavintola = Ravintola ?? new Ravintola()">Muokkaa</button>
+                            <button class="btn btn-danger" @onclick="() => PoistaRavintola(Ravintola ?? new Ravintola())">Poista</button>
                         </td>
                     }
                     else
@@ -55,6 +57,8 @@
                    
             </tr>
         }
+            }
+
     </tbody>
 </table>
 }
@@ -82,7 +86,7 @@
         </tr>
         <tr>
             <th></th>
-            @if(UusiRavintola.RavintolaID > 0)
+            @if(UusiRavintola?.RavintolaID > 0)
             {
                 <td><button @onclick="UusiRavintolaAction" class="btn btn-dark form-control-lg">Tallenna</button></td>
             }
@@ -94,35 +98,46 @@
     </table>
     <hr />
     <h3>Kategoriat</h3>
-    <button class="btn btn-info" @onclick="() => UusiRavintola.Kategoriat.Add(new Kategoria())">Uusi kategoria</button>
+    <button class="btn btn-info" @onclick="() => UusiRavintola?.Kategoriat?.Add(new Kategoria())">Uusi kategoria</button>
     <table class="table">
-        @foreach (var kat in UusiRavintola.Kategoriat)
+        @if(UusiRavintola != null && UusiRavintola.Kategoriat != null)
+        {
+             @foreach (var kat in UusiRavintola?.Kategoriat)
        {
-           <button class="btn btn-info" @onclick="() => kat.Ruuat.Add(new Ruoka())">Uusi ruoka</button>
+           <button class="btn btn-info" @onclick="() => kat?.Ruuat?.Add(new Ruoka())">Uusi ruoka</button>
            <tr>
                <th><input type="text" @bind-value=kat.Nimi/></th>
                <th>Annosnumero</th>
                <th>Ruoka</th>
            </tr>
-           @foreach (var ruoka in kat.Ruuat)
+            @if(kat != null && kat.Ruuat != null && kat.Ruuat.Count > 0)
+            {
+                            @foreach (var ruoka in kat?.Ruuat)
            {
            <tr>
-               <td><button class="btn btn-info" @onclick="() => ruoka.Hinnat.Add(new Hinta())">Uusi hintaryhmä</button></td>
+               <td><button class="btn btn-info" @onclick="() => ruoka?.Hinnat?.Add(new Hinta())">Uusi hintaryhmä</button></td>
                <td><input type="text" @bind-value=ruoka.AnnosNro/></td>
                <td><input type="text" @bind-value=ruoka.Nimi/></td>
            </tr>
-                @foreach (var hinta in ruoka.Hinnat)
+                @if(ruoka.Hinnat != null && ruoka.Hinnat.Count > 0)
+                {
+                @foreach (var hinta in ruoka?.Hinnat)
                 {
                     <tr>
                         <td></td>
                         <td>Kuvaus:<input type="text" @bind-value=hinta.Kuvaus /></td>
                         <td>Hinta:<input type="number" @bind-value=hinta.Summa /></td>
                     </tr>
+                } 
                 }
+
             }
-            <hr />
+            }
+
 
        }
+        }
+       
     </table>
 }
 
