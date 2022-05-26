@@ -11,14 +11,22 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddTransient<IEmailSender, CustomEmailer>();
-builder.Services.Configure<CustomEmailer.CustomEmailerOptions>(options => {
-    options.Host = builder.Configuration["MailSettings:smtpHost"];
-    options.Port = int.Parse(builder.Configuration["MailSettings:smtpPort"]);
-    options.UseSSL = bool.Parse(builder.Configuration["MailSettings:UseSSL"]);
-    options.Email = builder.Configuration["MailSettings:email"];
-    options.Password = builder.Configuration["MailSettings:password"];
-});
+
+try
+{
+    builder.Services.AddTransient<IEmailSender, CustomEmailer>();
+    builder.Services.Configure<CustomEmailer.CustomEmailerOptions>(options => {
+        options.Host = builder.Configuration["MailSettings:smtpHost"];
+        options.Port = int.Parse(builder.Configuration["MailSettings:smtpPort"]);
+        options.UseSSL = bool.Parse(builder.Configuration["MailSettings:UseSSL"]);
+        options.Email = builder.Configuration["MailSettings:email"];
+        options.Password = builder.Configuration["MailSettings:password"];
+    });
+}catch(Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
@@ -50,7 +58,7 @@ else
 }
 
 app.UseHttpsRedirection();
-
+app.UseDeveloperExceptionPage();
 app.UseStaticFiles();
 
 app.UseRouting();
