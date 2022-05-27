@@ -1,7 +1,8 @@
 ﻿@using Digiruokalista_Remastered.Data
 @using Microsoft.EntityFrameworkCore
 @using System.Security.Claims
-@inject IHttpContextAccessor HttpContextAccessor
+@using Microsoft.AspNetCore.Components.Authorization  
+@inject AuthenticationStateProvider AuthenticationStateProvider  
 @inject IDbContextFactory<Data.ApplicationDbContext> context
 
 
@@ -9,7 +10,7 @@
 {
     <h2>Ravintolat</h2>
 }
-@if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false == true && UusiRavintola == null && ValittuRavintola == null)
+@if (user.Identity.IsAuthenticated && UusiRavintola == null && ValittuRavintola == null)
 {
     <button class="btn btn-dark mb-1" @onclick="() => UusiRavintola = new Ravintola()">Uusi ravintola</button>
 }
@@ -25,7 +26,7 @@
             <tr>
                 <th>Nimi</th>
                 <th>Y-Tunnus</th>
-                @if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false == true)
+                @if (user.Identity.IsAuthenticated)
                 {
                    <th>Toiminnot</th> 
                 }else{
@@ -42,7 +43,7 @@
             <tr>
                 <td class="hover" @onclick="() => ValittuRavintola = Ravintola">@Ravintola?.Nimi</td>
                 <td>@Ravintola?.yTunnus</td>
-                    @if(HttpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) == Ravintola?.KayttajaID)
+                    @if(user.FindFirstValue(ClaimTypes.NameIdentifier) == Ravintola?.KayttajaID)
                     {
                         <td>
                             <button class="btn btn-info" @onclick="() => UusiRavintola = Ravintola ?? new Ravintola()">Muokkaa</button>
@@ -149,16 +150,19 @@
     private List<Ravintola> Ravintolat = null!;
     private Ravintola? ValittuRavintola = null!;
     private Ravintola? UusiRavintola = null!;
+    private ClaimsPrincipal user;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
+        var authstate = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authstate.User;
         var db = context.CreateDbContext();
         Ravintolat = db.Ravintola.Include(o => o.Kategoriat).ThenInclude(o => o.Ruuat).ThenInclude(o => o.Hinnat).ToList();
         base.OnInitialized();
     }
     void UusiRavintolaAction()
     {
-        var principal = HttpContextAccessor.HttpContext.User;
+        var principal = user;
         var loggedInUserId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if(string.IsNullOrEmpty(loggedInUserId)){
@@ -186,7 +190,7 @@
     }
     public void PoistaRavintola(Ravintola ravintola)
     {
-        var principal = HttpContextAccessor.HttpContext.User;
+        var principal = user;
         var loggedInUserId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if(ravintola.KayttajaID == loggedInUserId)
         {
