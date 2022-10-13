@@ -21,7 +21,7 @@ try
         options.UseSSL = bool.Parse(builder.Configuration["MailSettings:UseSSL"]);
         options.Email = builder.Configuration["MailSettings:email"];
         options.Password = builder.Configuration["MailSettings:password"];
-    });
+});
 }catch(Exception ex)
 {
     Console.WriteLine(ex.Message);
